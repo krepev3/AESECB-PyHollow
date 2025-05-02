@@ -19,8 +19,8 @@ logging.basicConfig(
 )
 
 # File Paths
-executor_path = r"" /*Payload PATH*/
-encrypted_path = r"" /*Enc PATH*/
+executor_path = r"" # Payload PATH
+encrypted_path = r"" # Enc PATH
 
 # AES Key (16 bytes)
 key = b'Sixteen byte key'
