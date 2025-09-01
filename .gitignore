@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PyInstaller build artifacts
+/build/
+/dist/
+
+# Project outputs
+/enc/*.enc
+/payloads/*.exe
